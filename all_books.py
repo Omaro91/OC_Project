@@ -5,7 +5,7 @@ import csv
 
 urli = "http://books.toscrape.com/index.html"
 response = requests.get(urli)  # code 200
-response.encoding = 'UTF-8'  # a réglé les problèmes d'exportation csv
+
 soup = BeautifulSoup(response.text, "lxml")  # affiche la page html
 ctg = []
 links = []
@@ -23,7 +23,7 @@ for url in ctg[1:]:
         while str(requests.get(url_m)) == "<Response [200]>":
 
             response = requests.get(url_m)  # code 200
-            response.encoding = 'UTF-8'  # a réglé les problèmes d'exportation csv
+
             soup = BeautifulSoup(response.text, "lxml")  # affiche la page html
             for lien in soup.find_all("h3"):
                 liens = lien.a["href"]
@@ -33,7 +33,7 @@ for url in ctg[1:]:
     else:
 
         response = requests.get(url)  # code 200
-        response.encoding = 'UTF-8'  # a réglé les problèmes d'exportation csv
+
         soup = BeautifulSoup(response.text, "lxml")  # affiche la page html
         for lien in soup.find_all("h3"):
             liens = lien.a["href"]
@@ -79,7 +79,7 @@ for url3 in links:
     ]
     infos.append(info)
 
-with open("all_books.csv", 'w', encoding="utf-8") as csvfile:
+with open("all_books.csv", "w", encoding="utf-8") as csvfile:
 
     writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
     writer.writeheader()
