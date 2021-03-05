@@ -44,7 +44,6 @@ csv_columns = ["product_page_url", "universal_product_code", "title", "price_inc
 
 for url3 in links:
     response = requests.get(url3)  # code 200
-    response.encoding = 'UTF-8'  # a réglé les problèmes d'exportation csv
     soup = BeautifulSoup(response.text, "lxml")  # affiche la page html
 
     upc = soup.find("th", text="UPC").find_next("td").text
