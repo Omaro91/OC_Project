@@ -44,10 +44,10 @@ def get_book_data(book_url):
     title = soup_book.find("h1").text
 
     inc_tax = soup_book.find("th", text="Price (incl. tax)").find_next("td").text
-    inc_tax_m = inc_tax[0] + " " + inc_tax[1:]
+    inc_tax_m = inc_tax[1:]
 
     exc_tax = soup_book.find("th", text="Price (excl. tax)").find_next("td").text
-    exc_tax_m = exc_tax[0] + " " + exc_tax[1:]
+    exc_tax_m = exc_tax[1:]
 
     num = soup_book.find("th", text="Availability").find_next("td").text
     num_m = re.findall(r'\d+', num)[0]
@@ -79,7 +79,7 @@ def get_book_data(book_url):
     image_alt = soup_book.find("div", class_="item active").find_next("img")["alt"]
     image_alt_m = re.sub("[\\\\/:*?\"<>|]", "", image_alt)
 
-    with open('../OC_Project/P2_csv_jpg/' + cat + "_" + image_alt_m + ".jpg", "wb") as img:
+    with open('jpg/' + cat + "_" + image_alt_m + ".jpg", "wb") as img:
         img.write(requests.get(image_url_m).content)
 
     info = {
@@ -101,7 +101,7 @@ for category_csv in get_categories():
     soup_csv = BeautifulSoup(response_csv.content, 'html.parser')
     category = soup_csv.find("li", class_="active").text
     # Ouvrir fichier csv
-    with open('../OC_Project/P2_csv_jpg/' + category + '.csv', 'w', encoding='utf-8-sig') as csvfile:
+    with open('csv/' + category + '.csv', 'w', encoding='utf-8-sig') as csvfile:
         csv_columns = ["product_page_url", "universal_product_code", "title", "price_including_tax",
                        "price_excluding_tax", "number_available", "product_description", "category", "review_rating",
                        "image_url"]
