@@ -2,119 +2,113 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import csv
-
 #  from word2number import w2n
 
-URL_ALL = "http://books.toscrape.com/"
-response = requests.get(URL_ALL)
-soup = BeautifulSoup(response.content, 'html.parser')
-
-URL_CTL = "http://books.toscrape.com/catalogue/"
-ctg = []
-links = []
-info_all = []
+URL_BTS = "http://books.toscrape.com/"
+categories = []
+books = []
 
 
-def url_cat():  # Scrapping des URLS de toutes les catégories du site
-    for ct in soup.find_all("ul", class_="nav nav-list"):
-        for cti in ct.select("a"):
-            ctg.append(URL_ALL + cti["href"])
+def get_categories():  # Scrapping des URLS de toutes les catégories du site
+    response_bts = requests.get(URL_BTS)
+    soup_bts = BeautifulSoup(response_bts.content, 'html.parser')
+    for ct in soup_bts.find_all("ul", class_="nav nav-list"):
+        for cti in ct.select("a")[1:]:
+            categories.append(URL_BTS + cti["href"])
+    return categories
 
 
-def url_books():  # Scrapping des URLS des livres pour chaque catégorie
-    for url in ctg[1:]:
-        i = 1
-        url_m = url.replace("index.html", "page-" + str(i) + ".html")
-
-        if requests.get(url_m).status_code == 200:
-            while requests.get(url_m).status_code == 200:
-                response_1 = requests.get(url_m)
-                soup_1 = BeautifulSoup(response_1.content, "html.parser")
-
-                for lien in soup_1.find_all("h3"):
-                    liens = lien.a["href"]
-                    links.append(liens.replace("../../../", URL_CTL))
-                i = i + 1
-                url_m = url.replace("index.html", "page-" + str(i) + ".html")
-
-        else:
-            response_2 = requests.get(url)
-            soup_2 = BeautifulSoup(response_2.content, "html.parser")
-
-            for lien in soup_2.find_all("h3"):
-                liens = lien.a["href"]
-                links.append(liens.replace("../../../", URL_CTL))
+def get_books(category_url):  # Scrapping des URLS des livres pour chaque catégorie
+    response_category = requests.get(category_url)
+    soup_category = BeautifulSoup(response_category.content, 'html.parser')
+    for long_book_url in soup_category.find_all("h3"):
+        short_book_url = long_book_url.a["href"]
+        books.append(short_book_url.replace("../../../", (URL_BTS + "catalogue/")))
+    next_page = soup_category.find("li", class_="next")
+    if next_page is not None:
+        for a in soup_category.find("li", class_="next"):
+            if a["href"] == "page-2.html":
+                next_category_url = category_url[:-10] + a["href"]
+            else:
+                next_category_url = category_url[:-11] + a["href"]
+            get_books(next_category_url)
+    return books
 
 
-def det_books():  # Scrapping des détails pour chaque livre
-    for url3 in links:
-        response_3 = requests.get(url3)
-        soup_3 = BeautifulSoup(response_3.content, "html.parser")
+def get_book_data(book_url):
+    response_book = requests.get(book_url)
+    soup_book = BeautifulSoup(response_book.content, "html.parser")
 
-        upc = soup_3.find("th", text="UPC").find_next("td").text
+    upc = soup_book.find("th", text="UPC").find_next("td").text
 
-        title = soup_3.find("h1").text
+    title = soup_book.find("h1").text
 
-        inc_tax = soup_3.find("th", text="Price (incl. tax)").find_next("td").text
-        inc_tax_m = inc_tax[0] + " " + inc_tax[1:]
+    inc_tax = soup_book.find("th", text="Price (incl. tax)").find_next("td").text
+    inc_tax_m = inc_tax[0] + " " + inc_tax[1:]
 
-        exc_tax = soup_3.find("th", text="Price (excl. tax)").find_next("td").text
-        exc_tax_m = exc_tax[0] + " " + exc_tax[1:]
+    exc_tax = soup_book.find("th", text="Price (excl. tax)").find_next("td").text
+    exc_tax_m = exc_tax[0] + " " + exc_tax[1:]
 
-        num = soup_3.find("th", text="Availability").find_next("td").text
-        num_m = re.findall(r'\d+', num)[0]
-        #  other method : num_m = (num.split()[2])[1:]
+    num = soup_book.find("th", text="Availability").find_next("td").text
+    num_m = re.findall(r'\d+', num)[0]
+    #  other method : num_m = (num.split()[2])[1:]
 
-        if soup_3.find("h2", text="Product Description") is not None:
-            desc = soup_3.find("h2", text="Product Description").find_next("p").text
-            desc_m = desc.replace(" ...more", "")
-        else:
-            desc_m = "NO DESCRIPTION AVAILABLE"
+    if soup_book.find("h2", text="Product Description") is not None:
+        desc = soup_book.find("h2", text="Product Description").find_next("p").text
+        desc_m = desc.replace(" ...more", "")
+    else:
+        desc_m = "NO DESCRIPTION AVAILABLE"
 
-        cat = soup_3.find("li", class_="active").find_previous("a").text
+    cat = soup_book.find("li", class_="active").find_previous("a").text
 
-        one_to_five = {
-            "One": 1,
-            "Two": 2,
-            "Three": 3,
-            "Four": 4,
-            "Five": 5
-        }
-        rev = soup_3.find("p", class_="star-rating")["class"][1]
-        rev_m = (one_to_five[rev])
-        #  other method : rev_m = w2n.word_to_num(rev)
+    one_to_five = {
+        "One": 1,
+        "Two": 2,
+        "Three": 3,
+        "Four": 4,
+        "Five": 5
+    }
+    rev = soup_book.find("p", class_="star-rating")["class"][1]
+    rev_m = (one_to_five[rev])
+    #  other method : rev_m = w2n.word_to_num(rev)
 
-        image_url = soup_3.find("div", class_="item active").find_next("img")["src"]
-        image_url_m = image_url.replace("../../", URL_ALL)
+    image_url = soup_book.find("div", class_="item active").find_next("img")["src"]
+    image_url_m = image_url.replace("../../", URL_BTS)
 
-        info = [
-            {"product_page_url": url3,
-             "universal_product_code": upc,
-             "title": title, "price_including_tax": inc_tax_m,
-             "price_excluding_tax": exc_tax_m,
-             "number_available": num_m,
-             "product_description": desc_m,
-             "category": cat,
-             "review_rating": rev_m,
-             "image_url": image_url_m}
-        ]
-        info_all.append(info)
+    # Récupération de l'image
+    image_alt = soup_book.find("div", class_="item active").find_next("img")["alt"]
+    image_alt_m = re.sub("[\\\\/:*?\"<>|]", "", image_alt)
+
+    with open('../OC_Project/P2_csv_jpg/' + cat + "_" + image_alt_m + ".jpg", "wb") as img:
+        img.write(requests.get(image_url_m).content)
+
+    info = {
+        "product_page_url": book_url,
+        "universal_product_code": upc,
+        "title": title, "price_including_tax": inc_tax_m,
+        "price_excluding_tax": exc_tax_m,
+        "number_available": num_m,
+        "product_description": desc_m,
+        "category": cat,
+        "review_rating": rev_m,
+        "image_url": image_url_m
+    }
+    return info
 
 
-csv_columns = ["product_page_url", "universal_product_code", "title", "price_including_tax", "price_excluding_tax",
-               "number_available", "product_description", "category", "review_rating", "image_url"]
-
-
-def save_csv():  # Enregistrement sur fichier CSV
-    with open("all_books.csv", 'w', encoding="utf-8-sig") as AB:
-        writer = csv.DictWriter(AB, fieldnames=csv_columns)
+for category_csv in get_categories():
+    response_csv = requests.get(category_csv)
+    soup_csv = BeautifulSoup(response_csv.content, 'html.parser')
+    category = soup_csv.find("li", class_="active").text
+    # Ouvrir fichier csv
+    with open('../OC_Project/P2_csv_jpg/' + category + '.csv', 'w', encoding='utf-8-sig') as csvfile:
+        csv_columns = ["product_page_url", "universal_product_code", "title", "price_including_tax",
+                       "price_excluding_tax", "number_available", "product_description", "category", "review_rating",
+                       "image_url"]
+        writer = csv.DictWriter(csvfile, fieldnames=csv_columns)
         writer.writeheader()
-        for data2 in info_all:
-            for data in data2:
-                writer.writerow(data)
-
-
-url_cat()  # Scrapping des URLS de toutes les catégories du site
-url_books()  # Scrapping des URLS des livres pour chaque catégorie
-det_books()  # Scrapping des détails pour chaque livre
-save_csv()  # Enregistrement sur fichier CSV
+        for book_csv in get_books(category_csv):
+            data = get_book_data(book_csv)
+            # Écrire une ligne dans le CSV
+            writer.writerow(data)
+            books = []
