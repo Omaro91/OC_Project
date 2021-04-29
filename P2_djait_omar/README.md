@@ -1,19 +1,16 @@
 # OC Projet_2 en Développement Python : <br> Utilisez les bases de Python pour l'analyse de marché.
 
 1. #### Créer et activer l'environnement virtuel :
+- Installer les modules correspondants au projet fournis dans le fichier requirements.txt. Pour cela, il suffit de ouvrir le terminal et d'exécuter la commande suivante :
 
-- Créer un nouvel environnement virtuel dédié au projet.
-
-- Installer les modules correspondants (les modules complets sont fournis dans le fichier requirements.txt). Dans le terminal, exécuter :
->* pip install beautifulsoup4
->* pip install bs4
->* pip install requests
->* pip install word2number
-
-- Créer les dossiers qui vont contenir les fichiers csv ainsi que les images à télécharger. Dans le terminal, exécuter :
->* mkdir csv
->* mkdir jpg
+> pip install -r requirements.txt
 
 2. #### Exécuter le code d'application :
+-  Ouvrir le terminal et exécuter la commande suivante :
 
-- Ouvrir le fichier P2_01_all_books.py et lancer le code.
+> python P2_01_all_books.py
+
+- A la fin de l'exécution, **2 dossiers** seront crées dans le même répertoire :
+
+	- **1 dossier csv** contenant toutes les informations des livres classées par catégorie.
+	- **1 dossier jpg** contenant toutes les couvertures des livres classés par catégorie.
