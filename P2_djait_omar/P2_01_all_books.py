@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import csv
-#  from word2number import w2n
+# from word2number import w2n
 
 URL_BTS = "http://books.toscrape.com/"
 categories = []
