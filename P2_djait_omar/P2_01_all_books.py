@@ -1,7 +1,9 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 import re
 import csv
+
 # from word2number import w2n
 
 URL_BTS = "http://books.toscrape.com/"
@@ -76,10 +78,8 @@ def get_book_data(book_url):
     image_url_m = image_url.replace("../../", URL_BTS)
 
     # Récupération de l'image
-    image_alt = soup_book.find("div", class_="item active").find_next("img")["alt"]
-    image_alt_m = re.sub("[\\\\/:*?\"<>|]", "", image_alt)
-
-    with open('jpg/' + cat + "_" + image_alt_m + ".jpg", "wb") as img:
+    os.makedirs("jpg/" + cat, exist_ok=True)
+    with open('jpg/' + cat + "/" + upc + ".jpg", "wb") as img:
         img.write(requests.get(image_url_m).content)
 
     info = {
@@ -101,6 +101,7 @@ for category_csv in get_categories():
     soup_csv = BeautifulSoup(response_csv.content, 'html.parser')
     category = soup_csv.find("li", class_="active").text
     # Ouvrir fichier csv
+    os.makedirs("csv", exist_ok=True)
     with open('csv/' + category + '.csv', 'w', encoding='utf-8-sig') as csvfile:
         csv_columns = ["product_page_url", "universal_product_code", "title", "price_including_tax",
                        "price_excluding_tax", "number_available", "product_description", "category", "review_rating",
