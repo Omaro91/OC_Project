@@ -4,8 +4,6 @@ from bs4 import BeautifulSoup
 import re
 import csv
 
-# from word2number import w2n
-
 URL_BTS = "http://books.toscrape.com/"
 categories = []
 books = []
@@ -29,10 +27,10 @@ def get_books(category_url):  # Scrapping des URLS des livres pour chaque catég
     next_page = soup_category.find("li", class_="next")
     if next_page is not None:
         for a in soup_category.find("li", class_="next"):
-            if a["href"] == "page-2.html":
-                next_category_url = category_url[:-10] + a["href"]
+            if a.get("href") == "page-2.html":
+                next_category_url = category_url[:-10] + a.get("href")
             else:
-                next_category_url = category_url[:-11] + a["href"]
+                next_category_url = category_url[:-11] + a.get("href")
             get_books(next_category_url)
     return books
 
@@ -72,7 +70,6 @@ def get_book_data(book_url):
     }
     rev = soup_book.find("p", class_="star-rating")["class"][1]
     rev_m = (one_to_five[rev])
-    #  other method : rev_m = w2n.word_to_num(rev)
 
     image_url = soup_book.find("div", class_="item active").find_next("img")["src"]
     image_url_m = image_url.replace("../../", URL_BTS)
