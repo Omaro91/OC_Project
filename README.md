@@ -12,7 +12,7 @@
 3. #### Exécuter le code d'application :
 -  Ouvrir le terminal et exécuter la commande suivante :
 
-> python P2_01_all_books.py
+> python all_books.py
 
 - A la fin de l'exécution, **2 dossiers** seront crées dans le même répertoire :
 
