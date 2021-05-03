@@ -4,7 +4,7 @@
 1. #### Description du projet  :
 - Le projet consiste à faire du scraping sur le site "https://books.toscrape.com/" afin de télécharger les informations détaillées des livres disponibles ainsi que les images des livres dans 2 dossiers séparés sur le répertoire local.
 
-3. #### Créer et activer l'environnement virtuel :
+2. #### Créer et activer l'environnement virtuel :
 - Installer les modules correspondants au projet fournis dans le fichier requirements.txt. Pour cela, il suffit de ouvrir le terminal et d'exécuter la commande suivante :
 
 > pip install -r requirements.txt
